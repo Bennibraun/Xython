@@ -7,7 +7,7 @@ def freq_to_char(max_freq):
     freqs = [[0,2150],[2150,2400],[2400,2650],[2650,2850],[2850,3100],[3100,3400],
             [3400,3550],[3550,5000]]
 
-    chars = ['C1','D','E','F','G','A','B','C2']
+    chars = ['C','D','E','F','G','A','B','K']
 
     for i, (min_f,max_f) in enumerate(freqs):
         if max_freq > min_f and max_freq <= max_f:
