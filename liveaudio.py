@@ -1,11 +1,12 @@
 import pyaudio
 import wave
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import threading
 from tkinter import *
 from xython import xylophuck
+import scipy.signal
 
 
 class streamHandler():
@@ -41,7 +42,7 @@ class streamHandler():
 
         for i in range(0, int(self.rate / self.chunk * stop_time)):
             try:
-                data = numpy.frombuffer(self.stream.read(self.chunk),'Int16')
+                data = np.frombuffer(self.stream.read(self.chunk),'Int16')
                 frames.append(data)
             except:
                 # print('failed to retrieve data from audio buffer')
@@ -77,12 +78,33 @@ audioHandler = streamHandler(format=FORMAT,
 freqs = [[1800,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3200],[3200,3400],[3400,3575],[3575,5000]]
 chars = ['C','D','E','F','G','A','B','K']
 
-def freq_to_char(max_freq):
+
+def get_max_strength_freq(time_data,plot=False):
+
+    print('number of frames', len(time_data))
+
+    freqs,powers = scipy.signal.welch(time_data,fs = 44100,nperseg=500)
+
+    maxfreq = freqs[np.argmax(powers)]
+
+    if plot:
+        plt.plot(freqs,powers)
+        plt.xlim([0,5000])
+        plt.show()
+
+    return maxfreq
+
+def freq_to_char(time_data):
+
+        max_freq = get_max_strength_freq(time_data)
+
         if max_freq < 1000: return None
 
         for i, (min_f,max_f) in enumerate(freqs):
             if max_freq > min_f and max_freq <= max_f:
                 return(chars[i])
+
+
 
 def compile_program():
     global program_text
@@ -147,7 +169,7 @@ def process_audio():
     print('processing audio')
     global frames
     global program_text
-    note = freq_to_char(max(frames))
+    note = freq_to_char(frames)
     print(frames[:20])
     if note:
         print(note)
@@ -160,12 +182,13 @@ def gather_live_audio():
     global program_text
     print("beginning recording")
 
-    audioHandler.open_stream()
-
     T = Text(window, height=5, width=40)
     T.place(x=150,y=10)
 
     while True:
+
+        audioHandler.open_stream()
+
         program_text = T.get('1.0',END)
         if recording_active:
             print('recording sound')
@@ -175,7 +198,7 @@ def gather_live_audio():
             t1.start()
             T.delete('1.0', END)
             T.insert(END, program_text)
-        if end_program:
+        if end_program or not frames:
             break
 
     print('ending recording, closing stream')
