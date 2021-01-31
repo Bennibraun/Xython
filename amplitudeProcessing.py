@@ -67,11 +67,6 @@ class freqHandler():
         self.freqs = new_ranges
 
 
-
-
-
-
-
 audioHandler = streamHandler(format=FORMAT,
                 channels=CHANNELS,
                 rate=RATE,

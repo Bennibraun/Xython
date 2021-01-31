@@ -88,7 +88,14 @@ def compile_program():
     global program_text
     T = Text(window, height=5, width=40)
     T.place(x=150,y=80)
-    T.insert(END, xylophuck(program_text))
+    try:
+        output = xylophuck(program_text)
+    except:
+        print('xylophuck function call failed')
+        output = 'Compilation error'
+    if output == None or output == '':
+        output = 'No output'
+    T.insert(END, output)
 
 
 def resume_recording():
@@ -147,11 +154,13 @@ def process_audio():
     print('processing audio')
     global frames
     global program_text
+    global chars
     note = freq_to_char(max(frames))
     print(frames[:20])
     if note:
         print(note)
-        program_text += note
+        if note in chars:
+            program_text += note
 
 
 def gather_live_audio():
@@ -166,11 +175,10 @@ def gather_live_audio():
     T.place(x=150,y=10)
 
     while True:
-        program_text = T.get('1.0',END)
         if recording_active:
             print('recording sound')
+            audioHandler.open_stream()
             frames = audioHandler.record(RECORD_SECONDS)
-            print(len(frames))
             t1 = threading.Thread(target=process_audio)
             t1.start()
             T.delete('1.0', END)
