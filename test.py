@@ -9,6 +9,7 @@ filename = 'amplitude'
 with open(filename, 'rb') as f:
      frames = pickle.load(f)
 
+print(frames[:20])
 
 time,amplitude = map(list, zip(*frames))
 amplitude = [amp[0] for amp in amplitude]

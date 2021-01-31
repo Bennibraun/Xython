@@ -13,23 +13,33 @@ def freq_to_char(max_freq):
         if max_freq > min_f and max_freq <= max_f:
             return(chars[i])
 
-filename = 'amplitude'
+def frames_to_char(frames):
+    try:
+        time,amplitude = map(list, zip(*frames))
+        amplitude = [amp[0] for amp in amplitude]
+        freqs,powers = scipy.signal.welch(amplitude,fs = 44100,nperseg=1000)
+        maxfreq = freqs[np.argmax(powers)]
+        return freq_to_char(maxfreq)
+    except:
+        print('frames_to_char failed, ',len(frames))
 
-with open(filename, 'rb') as f:
-     frames = pickle.load(f)
+# filename = 'amplitude'
+
+# with open(filename, 'rb') as f:
+#      frames = pickle.load(f)
 
 
-time,amplitude = map(list, zip(*frames))
-amplitude = [amp[0] for amp in amplitude]
+# time,amplitude = map(list, zip(*frames))
+# amplitude = [amp[0] for amp in amplitude]
 
-amplitude = amplitude
+# amplitude = amplitude
 
-freqs,powers = scipy.signal.welch(amplitude,fs = 44100,nperseg=1000)
+# freqs,powers = scipy.signal.welch(amplitude,fs = 44100,nperseg=1000)
 
 
-plt.plot(freqs,powers)
-plt.xlim([0,5000])
-#plt.show()
-maxfreq = freqs[np.argmax(powers)]
-symbol = freq_to_char(maxfreq)
-print(maxfreq,symbol)
+# plt.plot(freqs,powers)
+# plt.xlim([0,5000])
+# #plt.show()
+# maxfreq = freqs[np.argmax(powers)]
+# symbol = freq_to_char(maxfreq)
+# print(maxfreq,symbol)
