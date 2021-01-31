@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pickle
 import threading
 from tkinter import *
-from amplitudeProcessing import frames_to_char
+from xython import xylophuck
 
 
 class streamHandler():
@@ -40,17 +40,12 @@ class streamHandler():
         frames = []
 
         for i in range(0, int(self.rate / self.chunk * stop_time)):
-<<<<<<< HEAD
             try:
                 data = numpy.frombuffer(self.stream.read(self.chunk),'Int16')
                 frames.append(data)
             except:
                 # print('failed to retrieve data from audio buffer')
                 break
-=======
-            data = numpy.frombuffer(self.stream.read(self.chunk,exception_on_overflow=False),'Int16')
-            frames.append(data)
->>>>>>> 63b31611491f72c8cc38827e837e83591cd25ab9
 
         frames = [amp[0] for amp in frames]
 
@@ -61,27 +56,40 @@ CHUNK = 1
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-<<<<<<< HEAD
-RECORD_SECONDS = 1
-=======
 RECORD_SECONDS = 2
->>>>>>> 63b31611491f72c8cc38827e837e83591cd25ab9
 WAVE_OUTPUT_FILENAME = 'output'
 
-program_text = 'test'
+program_text = ''
 frames = 'frame'
 recording_active = True
 end_program = False
 pause_btn = None
 resume_btn = None
 end_btn = None
+compile_btn = None
 
-<<<<<<< HEAD
 audioHandler = streamHandler(format=FORMAT,
                 channels=CHANNELS,
                 rate=RATE,
                 io=True,
                 chunk=CHUNK)
+
+freqs = [[1800,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3200],[3200,3400],[3400,3575],[3575,5000]]
+chars = ['C','D','E','F','G','A','B','K']
+
+def freq_to_char(max_freq):
+        if max_freq < 1000: return None
+
+        for i, (min_f,max_f) in enumerate(freqs):
+            if max_freq > min_f and max_freq <= max_f:
+                return(chars[i])
+
+def compile_program():
+    global program_text
+    T = Text(window, height=5, width=40)
+    T.place(x=150,y=80)
+    T.insert(END, xylophuck(program_text))
+
 
 def resume_recording():
     print('resume')
@@ -109,8 +117,20 @@ def end_listening():
     print('ending listener')
     global pause_btn
     global resume_btn
+    global end_btn
     global end_program
     end_program = True
+    try:
+        pause_btn.place_forget()
+    except:
+        pass
+    try:
+        resume_btn.place_forget()
+    except:
+        pass
+    end_btn.place_forget()
+    compile_btn = Button(window, text="Compile and Run", command=compile_program, height=3, width=15)
+    compile_btn.place(x=20, y=100)
 
 def start_threading():
     global end_btn
@@ -126,7 +146,8 @@ def start_threading():
 def process_audio():
     print('processing audio')
     global frames
-    note = frames_to_char(frames)
+    global program_text
+    note = freq_to_char(max(frames))
     print(frames[:20])
     if note:
         print(note)
@@ -136,22 +157,22 @@ def process_audio():
 def gather_live_audio():
     global recording_active
     global frames
+    global program_text
     print("beginning recording")
 
     audioHandler.open_stream()
 
-    T = Text(window, height=10, width=40)
+    T = Text(window, height=5, width=40)
     T.place(x=150,y=10)
 
     while True:
+        program_text = T.get('1.0',END)
         if recording_active:
             print('recording sound')
             frames = audioHandler.record(RECORD_SECONDS)
             print(len(frames))
             t1 = threading.Thread(target=process_audio)
             t1.start()
-            # lbl = Label(window, text=program_text)
-            # lbl.grid(column=0, row=0)
             T.delete('1.0', END)
             T.insert(END, program_text)
         if end_program:
@@ -175,14 +196,6 @@ with open('amplitude','wb') as f:
     pickle.dump(frames,f)
 
 # print(frames)
-
-wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(audioHandler.p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
-=======
 
 # audioHandler = streamHandler(format=FORMAT,
 #                 channels=CHANNELS,
@@ -209,7 +222,6 @@ wf.close()
 # wf.setframerate(RATE)
 # wf.writeframes(b''.join(amplitude))
 # wf.close()
->>>>>>> 63b31611491f72c8cc38827e837e83591cd25ab9
 
 #plt.plot(frames)
 #plt.show()

@@ -13,39 +13,7 @@ class freqHandler():
         self.freqs = [[1800,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3200],[3200,3400],
                 [3400,3575],[3575,5000]]
 
-<<<<<<< HEAD
-def frames_to_char(frames):
-    try:
-        time,amplitude = map(list, zip(*frames))
-        amplitude = [amp[0] for amp in amplitude]
-        freqs,powers = scipy.signal.welch(amplitude,fs = 44100,nperseg=1000)
-        maxfreq = freqs[np.argmax(powers)]
-        return freq_to_char(maxfreq)
-    except:
-        print('frames_to_char failed, ',len(frames))
-
-# filename = 'amplitude'
-
-# with open(filename, 'rb') as f:
-#      frames = pickle.load(f)
-
-
-# time,amplitude = map(list, zip(*frames))
-# amplitude = [amp[0] for amp in amplitude]
-
-# amplitude = amplitude
-
-# freqs,powers = scipy.signal.welch(amplitude,fs = 44100,nperseg=1000)
-
-
-# plt.plot(freqs,powers)
-# plt.xlim([0,5000])
-# #plt.show()
-# maxfreq = freqs[np.argmax(powers)]
-# symbol = freq_to_char(maxfreq)
-# print(maxfreq,symbol)
-=======
-        self.chars = ['C1','D','E','F','G','A','B','C2']
+        self.chars = ['C','D','E','F','G','A','B','K']
 
     def freq_to_char(self,max_freq):
 
@@ -129,4 +97,3 @@ symbol = freqDomain.freq_to_char(maxfreq)
 print(maxfreq,symbol)
 
 audioHandler.close_stream()
->>>>>>> 63b31611491f72c8cc38827e837e83591cd25ab9
