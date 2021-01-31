@@ -1,11 +1,12 @@
 import pyaudio
 import wave
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import threading
 from tkinter import *
 from xython import xylophuck
+import scipy.signal
 
 
 class streamHandler():
@@ -41,7 +42,7 @@ class streamHandler():
 
         for i in range(0, int(self.rate / self.chunk * stop_time)):
             try:
-                data = numpy.frombuffer(self.stream.read(self.chunk),'Int16')
+                data = np.frombuffer(self.stream.read(self.chunk),'Int16')
                 frames.append(data)
             except:
                 # print('failed to retrieve data from audio buffer')
@@ -56,7 +57,7 @@ CHUNK = 1
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 2
+RECORD_SECONDS = 1
 WAVE_OUTPUT_FILENAME = 'output'
 
 program_text = ''
@@ -77,12 +78,33 @@ audioHandler = streamHandler(format=FORMAT,
 freqs = [[1800,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3200],[3200,3400],[3400,3575],[3575,5000]]
 chars = ['C','D','E','F','G','A','B','K']
 
-def freq_to_char(max_freq):
+
+def get_max_strength_freq(time_data,plot=False):
+
+    # print('number of frames', len(time_data))
+
+    freqs,powers = scipy.signal.welch(time_data,fs = 44100,nperseg=500)
+
+    maxfreq = freqs[np.argmax(powers)]
+
+    if plot:
+        plt.plot(freqs,powers)
+        plt.xlim([0,5000])
+        plt.show()
+
+    return maxfreq
+
+def freq_to_char(time_data):
+
+        max_freq = get_max_strength_freq(time_data)
+
         if max_freq < 1000: return None
 
         for i, (min_f,max_f) in enumerate(freqs):
             if max_freq > min_f and max_freq <= max_f:
                 return(chars[i])
+
+
 
 def compile_program():
     global program_text
@@ -91,7 +113,7 @@ def compile_program():
     try:
         output = xylophuck(program_text)
     except:
-        print('xylophuck function call failed')
+        # print('xylophuck function call failed')
         output = 'Compilation error'
     if output == None or output == '':
         output = 'No output'
@@ -99,7 +121,7 @@ def compile_program():
 
 
 def resume_recording():
-    print('resume')
+    # print('resume')
     global resume_btn
     global pause_btn
     global recording_active
@@ -111,7 +133,7 @@ def resume_recording():
     audioHandler.open_stream()
 
 def pause_recording():
-    print('pause')
+    # print('pause')
     global resume_btn
     global pause_btn
     global recording_active
@@ -121,7 +143,7 @@ def pause_recording():
     resume_btn.place(x=20, y=30)
 
 def end_listening():
-    print('ending listener')
+    # print('ending listener')
     global pause_btn
     global resume_btn
     global end_btn
@@ -151,14 +173,14 @@ def start_threading():
     t2.start()
 
 def process_audio():
-    print('processing audio')
+    # print('processing audio')
     global frames
     global program_text
     global chars
-    note = freq_to_char(max(frames))
-    print(frames[:20])
+    note = freq_to_char(frames)
+    # print(frames[:20])
     if note:
-        print(note)
+        print('note: ',note)
         if note in chars:
             program_text += note
 
@@ -167,26 +189,24 @@ def gather_live_audio():
     global recording_active
     global frames
     global program_text
-    print("beginning recording")
-
-    audioHandler.open_stream()
+    # print("beginning recording")
 
     T = Text(window, height=5, width=40)
     T.place(x=150,y=10)
 
     while True:
         if recording_active:
-            print('recording sound')
+            print('next interval')
             audioHandler.open_stream()
             frames = audioHandler.record(RECORD_SECONDS)
             t1 = threading.Thread(target=process_audio)
             t1.start()
             T.delete('1.0', END)
             T.insert(END, program_text)
-        if end_program:
+        if end_program or not frames:
             break
 
-    print('ending recording, closing stream')
+    # print('ending recording, closing stream')
     audioHandler.close_stream()
 
 window = Tk()
