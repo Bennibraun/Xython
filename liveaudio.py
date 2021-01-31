@@ -13,6 +13,8 @@ class streamHandler():
         self.io = io
         self.chunk = chunk
 
+        self.open = False
+
     def open_stream(self):
 
         self.stream = self.p.open(format=self.format,
@@ -21,17 +23,23 @@ class streamHandler():
                 input=self.io,
                 frames_per_buffer=self.chunk)
 
+        self.open = True
+
     def close_stream(self):
         self.stream.stop_stream()
         self.stream.close()
         self.p.terminate()
 
+        self.open = False
+
     def record(self,stop_time):
         frames = []
 
         for i in range(0, int(self.rate / self.chunk * stop_time)):
-            data = numpy.frombuffer(self.stream.read(self.chunk),'Int16')
+            data = numpy.frombuffer(self.stream.read(self.chunk,exception_on_overflow=False),'Int16')
             frames.append(data)
+
+        frames = [amp[0] for amp in frames]
 
         return frames
 
@@ -40,35 +48,36 @@ CHUNK = 1
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 5
+RECORD_SECONDS = 2
 WAVE_OUTPUT_FILENAME = 'output'
 
 
-audioHandler = streamHandler(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                io=True,
-                chunk=CHUNK)
 
-print("* recording")
-
-audioHandler.open_stream()
-
-frames = audioHandler.record(RECORD_SECONDS)
-
-audioHandler.close_stream()
-
-print("* done recording")
-
-with open('amplitude','wb') as f:
-    pickle.dump(frames,f)
-
-wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(audioHandler.p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
+# audioHandler = streamHandler(format=FORMAT,
+#                 channels=CHANNELS,
+#                 rate=RATE,
+#                 io=True,
+#                 chunk=CHUNK)
+#
+# print("* recording")
+#
+# audioHandler.open_stream()
+#
+# frames = audioHandler.record(RECORD_SECONDS)
+#
+# audioHandler.close_stream()
+#
+# print("* done recording")
+#
+# with open('amplitude','wb') as f:
+#     pickle.dump(frames,f)
+#
+# wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+# wf.setnchannels(CHANNELS)
+# wf.setsampwidth(audioHandler.p.get_sample_size(FORMAT))
+# wf.setframerate(RATE)
+# wf.writeframes(b''.join(amplitude))
+# wf.close()
 
 #plt.plot(frames)
 #plt.show()
