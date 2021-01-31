@@ -43,25 +43,17 @@ class freqHandler():
         freqs = []
         for i in range(len(self.chars)):
 
-            # while True:
-            #     character = input('Input a ''c'' when you''re ready to play')
-            #     if character == 'c':
-            #         break
-
             print('Please play note number #%d' % (i+1))
             frames = audioHandler.record(4)
             print('Recorded! Processing: . . .')
             maxfreq = self.get_max_strength_freq(frames)
             freqs.append(maxfreq)
 
-        print(freqs)
 
         new_freqs = []
         for i in range(len(freqs)-1):
             new_freqs.append(np.mean((freqs[i],freqs[i+1])))
         freqs = new_freqs
-
-        print(freqs)
 
         new_ranges = []
         for i in range(len(freqs)):
@@ -72,7 +64,8 @@ class freqHandler():
             else:
                 new_ranges.append([freqs[i],freqs[i+1]])
 
-        print(new_ranges)
+        self.freqs = new_ranges
+
 
 
 
