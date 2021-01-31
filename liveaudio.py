@@ -81,7 +81,7 @@ chars = ['C','D','E','F','G','A','B','K']
 
 def get_max_strength_freq(time_data,plot=False):
 
-    # print('number of frames', len(time_data))
+    print('number of frames', len(time_data))
 
     freqs,powers = scipy.signal.welch(time_data,fs = 44100,nperseg=500)
 
@@ -113,7 +113,7 @@ def compile_program():
     try:
         output = xylophuck(program_text)
     except:
-        # print('xylophuck function call failed')
+        print('xylophuck function call failed')
         output = 'Compilation error'
     if output == None or output == '':
         output = 'No output'
@@ -121,29 +121,29 @@ def compile_program():
 
 
 def resume_recording():
-    # print('resume')
+    print('resume')
     global resume_btn
     global pause_btn
     global recording_active
     global audioHandler
     recording_active = True
     resume_btn.place_forget()
-    pause_btn = Button(window, text="Pause", command=pause_recording, height=3, width=15)
+    pause_btn = Button(window, text="Pause", command=pause_recording, bg='blue', height=3, width=15)
     pause_btn.place(x=20, y=30)
     audioHandler.open_stream()
 
 def pause_recording():
-    # print('pause')
+    print('pause')
     global resume_btn
     global pause_btn
     global recording_active
     recording_active = False
     pause_btn.place_forget()
-    resume_btn = Button(window, text="Resume", command=resume_recording, height=3, width=15)
+    resume_btn = Button(window, text="Resume", command=resume_recording, bg='blue', height=3, width=15)
     resume_btn.place(x=20, y=30)
 
 def end_listening():
-    # print('ending listener')
+    print('ending listener')
     global pause_btn
     global resume_btn
     global end_btn
@@ -158,45 +158,44 @@ def end_listening():
     except:
         pass
     end_btn.place_forget()
-    compile_btn = Button(window, text="Compile and Run", command=compile_program, height=3, width=15)
+    compile_btn = Button(window, text="Compile and Run", command=compile_program, bg='yellow', height=3, width=15)
     compile_btn.place(x=20, y=100)
 
 def start_threading():
     global end_btn
     global pause_btn
     start_btn.place_forget()
-    pause_btn = Button(window, text="Pause", command=pause_recording, height=3, width=15)
+    pause_btn = Button(window, text="Pause", command=pause_recording, bg='blue', height=3, width=15)
     pause_btn.place(x=20, y=30)
-    end_btn = Button(window, text="End", command=end_listening, height=3, width=15)
+    end_btn = Button(window, text="End", command=end_listening, bg='red', height=3, width=15)
     end_btn.place(x=20, y=100)
     t2 = threading.Thread(target=gather_live_audio)
     t2.start()
 
 def process_audio():
-    # print('processing audio')
+    print('processing audio')
     global frames
     global program_text
     global chars
     note = freq_to_char(frames)
-    # print(frames[:20])
+    print(frames[:20])
     if note:
-        print('note: ',note)
+        print('note',note)
         if note in chars:
             program_text += note
-
 
 def gather_live_audio():
     global recording_active
     global frames
     global program_text
-    # print("beginning recording")
+    print("beginning recording")
 
     T = Text(window, height=5, width=40)
     T.place(x=150,y=10)
 
     while True:
         if recording_active:
-            print('next interval')
+            print('recording sound')
             audioHandler.open_stream()
             frames = audioHandler.record(RECORD_SECONDS)
             t1 = threading.Thread(target=process_audio)
@@ -205,8 +204,11 @@ def gather_live_audio():
             T.insert(END, program_text)
         if end_program or not frames:
             break
+        program_text = T.get('1.0',END)
+        print('notes: ',program_text)
 
-    # print('ending recording, closing stream')
+
+    print('ending recording, closing stream')
     audioHandler.close_stream()
 
 window = Tk()
@@ -214,7 +216,7 @@ window.title("Xython Interpreter")
 window_width = 500
 window_height = 200
 window.geometry(str(window_width)+'x'+str(window_height))
-start_btn = Button(window, text="Start Listening", command=start_threading, height=3, width=15)
+start_btn = Button(window, text="Start Listening", command=start_threading, bg='green', height=3, width=15)
 start_btn.place(x=20, y=30)
 window.mainloop()
 
