@@ -40,7 +40,14 @@ stream.stop_stream()
 stream.close()
 p.terminate()
 
+time,amplitude = map(list, zip(*frames))
 
+wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+wf.setnchannels(CHANNELS)
+wf.setsampwidth(p.get_sample_size(FORMAT))
+wf.setframerate(RATE)
+wf.writeframes(b''.join(amplitude))
+wf.close()
 
-plt.plot(frames)
-plt.show()
+#plt.plot(frames)
+#plt.show()
