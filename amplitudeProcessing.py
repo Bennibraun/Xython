@@ -4,8 +4,8 @@ import numpy as np
 import pickle
 
 def freq_to_char(max_freq):
-    freqs = [[0,2150],[2150,2400],[2400,2650],[2650,2850],[2850,3100],[3100,3400],
-            [3400,3550],[3550,5000]]
+    freqs = [[0,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3100],[3100,3400],
+            [3400,3575],[3575,5000]]
 
     chars = ['C1','D','E','F','G','A','B','C2']
 
@@ -33,4 +33,4 @@ plt.xlim([0,5000])
 #plt.show()
 maxfreq = freqs[np.argmax(powers)]
 symbol = freq_to_char(maxfreq)
-print(symbol)
+print(maxfreq,symbol)
