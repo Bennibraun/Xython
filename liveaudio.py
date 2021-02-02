@@ -69,42 +69,6 @@ resume_btn = None
 end_btn = None
 compile_btn = None
 
-audioHandler = streamHandler(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                io=True,
-                chunk=CHUNK)
-
-freqs = [[1800,2150],[2150,2400],[2400,2600],[2600,2850],[2850,3200],[3200,3400],[3400,3575],[3575,5000]]
-chars = ['C','D','E','F','G','A','B','K']
-
-
-def get_max_strength_freq(time_data,plot=False):
-
-    print('number of frames', len(time_data))
-
-    freqs,powers = scipy.signal.welch(time_data,fs = 44100,nperseg=500)
-
-    maxfreq = freqs[np.argmax(powers)]
-
-    if plot:
-        plt.plot(freqs,powers)
-        plt.xlim([0,5000])
-        plt.show()
-
-    return maxfreq
-
-def freq_to_char(time_data):
-
-        max_freq = get_max_strength_freq(time_data)
-
-        if max_freq < 1000: return None
-
-        for i, (min_f,max_f) in enumerate(freqs):
-            if max_freq > min_f and max_freq <= max_f:
-                return(chars[i])
-
-
 
 def compile_program():
     global program_text
